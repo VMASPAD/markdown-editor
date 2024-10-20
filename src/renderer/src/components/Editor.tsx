@@ -48,16 +48,22 @@ import {
 } from '@renderer/components/ui/dialog/Dialog'
 import { Input } from './ui/input/Input'
 import mermaid from 'mermaid'
+
+
+interface Component {
+  name: string
+  description: string
+}
+
+interface ArchivesMd {
+  name: string
+  content: string
+}
 function Editor() {
   const [md, setMd] = useState('')
   const [componentName, setComponentName] = useState('')
   const [componentDescription, setComponentDescription] = useState('')
-  const [archivesmd, setArchivesmd] = useState<string[]>([])
-  interface Component {
-    name: string
-    description: string
-  }
-
+  const [archivesmd, setArchivesmd] = useState<ArchivesMd[]>([])
   const [components, setComponents] = useState<Component[]>([])
   const markdownRef = useRef<HTMLDivElement>(null)
 
