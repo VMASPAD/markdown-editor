@@ -1,5 +1,9 @@
 # Markdown Editor
 
+<div align="center">
+  <img src="https://portfoliotavm.com/markdown-editor/icon.png" width="200px" height="200px"/>
+</div>
+
 This project is a Markdown editor built with Electron and React, written in TypeScript. The editor supports GitHub Flavored Markdown (GFM), math expressions with KaTeX, and Mermaid diagrams for flowcharts, Gantt charts, and other graphical representations.
 
 ## Features
