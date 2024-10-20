@@ -1,5 +1,6 @@
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
-import { join } from 'path'
+import path, { join } from 'path'
+import * as fs from 'fs'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 
@@ -52,6 +53,41 @@ app.whenReady().then(() => {
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
 
+  ipcMain.handle('getArchivesMd', async () => {
+    const folderPath = 'C:\\md-files\\'
+
+    // Función para crear la carpeta si no existe
+    const createFolderIfNotExists = (folderPath: string) => {
+      if (!fs.existsSync(folderPath)) {
+        fs.mkdirSync(folderPath)
+      }
+    }
+
+    // Función para crear un archivo .md con contenido predeterminado
+    const createMdFile = (filePath: string, content: string) => {
+      fs.writeFileSync(filePath, content)
+    }
+
+    // Función para leer todos los archivos .md en la carpeta
+    const getMdFilesContent = (folderPath: string) => {
+      const files = fs.readdirSync(folderPath)
+      const mdFiles = files.filter((file) => path.extname(file) === '.md')
+      const result = mdFiles.map((file) => {
+        const content = fs.readFileSync(path.join(folderPath, file), 'utf-8')
+        return { name: file, content: content }
+      })
+      return result
+    }
+
+    createFolderIfNotExists(folderPath)
+
+    const filePath = path.join(folderPath, 'example.md')
+    const fileContent = '# Example Markdown File\nThis is an example content.'
+    createMdFile(filePath, fileContent)
+
+    const mdFilesContent = getMdFilesContent(folderPath)
+    return mdFilesContent
+  })
   createWindow()
 
   app.on('activate', function () {

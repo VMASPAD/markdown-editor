@@ -52,6 +52,7 @@ function Editor() {
   const [md, setMd] = useState('')
   const [componentName, setComponentName] = useState('')
   const [componentDescription, setComponentDescription] = useState('')
+  const [archivesmd, setArchivesmd] = useState<string[]>([])
   interface Component {
     name: string
     description: string
@@ -121,7 +122,10 @@ function Editor() {
     setMd((prevMd) => `${prevMd}\n\n${component.description}`)
     localStorage.setItem('md', `${md}\n\n${component.description}`)
   }
-
+  const insertExteralMd = (component) => {
+    setMd((prevMd) => `${prevMd}\n\n${component}`)
+    localStorage.setItem('md', `${md}\n\n${component}`)
+  }
   const editComponent = (index, updatedComponent) => {
     const updatedComponents = [...components]
     updatedComponents[index] = updatedComponent
@@ -199,10 +203,70 @@ function Editor() {
 
     return <div ref={elementRef} dangerouslySetInnerHTML={{ __html: svg }} />
   }
+
+  const handleGetArchivesMd = async () => {
+    const archives = await window.electron.ipcRenderer.invoke('getArchivesMd')
+    setArchivesmd(archives)
+    console.log(archives)
+  }
   return (
     <>
       <Island size={'lg'} position={'top'} distance={1} className="gap-5">
-        <SaveAll onClick={saveToFile} />
+        <Drawer>
+          <DrawerTrigger onClick={handleGetArchivesMd}>Archives</DrawerTrigger>
+          <DrawerContent>
+            <DrawerHeader>
+              <DrawerTitle>Your Archives</DrawerTitle>
+              <DrawerDescription className="flex flex-row items-center justify-center">
+                <Carousel
+                  opts={{
+                    align: 'start'
+                  }}
+                  className="w-full max-w-sm"
+                >
+                  <CarouselContent>
+                    {archivesmd.map((component, index) => (
+                      <CarouselItem key={index} className="">
+                        <div className="p-1 flex flex-col justify-center items-center gap-3">
+                          <span className="text-xl font-semibold">{component.name}</span>
+                          <div className="flex gap-2 mt-2">
+                            <Button onClick={() => insertExteralMd(component.content)}>
+                              Insert
+                            </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger>View</AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>{component.name}</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    <Textarea
+                                      value={component.content}
+                                      placeholder="Component code"
+                                    />
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Exit</AlertDialogCancel>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        </div>
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                  <CarouselPrevious />
+                  <CarouselNext />
+                </Carousel>
+              </DrawerDescription>
+            </DrawerHeader>
+            <DrawerFooter>
+              <DrawerClose>
+                <Button variant="outline">Exit</Button>
+              </DrawerClose>
+            </DrawerFooter>
+          </DrawerContent>
+        </Drawer>
         <Sheet>
           <SheetTrigger>CSS</SheetTrigger>
           <SheetContent>
@@ -318,6 +382,7 @@ function Editor() {
           </DrawerContent>
         </Drawer>
         <ImportIcon onClick={importArchiveMd} />
+        <SaveAll onClick={saveToFile} />
       </Island>
       <div className="grid grid-cols-2 h-screen m-3 gap-5">
         <Textarea value={md} onChange={handleChange} placeholder="Any code HTML or MarkDown" />
